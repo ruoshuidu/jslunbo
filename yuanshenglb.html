@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        *{padding:0;margin: 0;list-style: none;}
+        .wrapper{width: 790px;height: 340px;margin:100px auto 0;overflow: hidden;position: relative;}
+        .wrapper .sliderPage{width: 3950px;height: 340px;position: absolute;left: 0;top: 0;}
+        .wrapper .sliderPage li{float: left;width: 790px;height: 340px;}
+        .btn{width: 40px;height: 40px;background: #000;color: #fff;font-size: 30px;position: absolute;top: 50%;margin-top: -20px;
+        text-align: center;line-height: 40px;opacity: 0.3;cursor: pointer;}
+        .btnLeft{left: 15px;}
+        .btnRight{right: 15px;}
+        .btn:hover{opacity: 0.8;}
+        .sliderIndex{position: absolute;bottom:15px;left: 0px;width: 100%;text-align: center;}
+        .sliderIndex span{display: inline-block;width: 14px;height:14px;background: #ccc;border-radius: 50%;margin-left: 10px;
+        cursor: pointer;}
+        .sliderIndex span.active{background: #f40;}
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <ul class="sliderPage">
+            <li><img src="img/1.jpg" alt=""></li>
+            <li><img src="img/2.jpg" alt=""></li>
+            <li><img src="img/3.jpg" alt=""></li>
+            <li><img src="img/4.jpg" alt=""></li>
+            <li><img src="img/1.jpg" alt=""></li>
+        </ul>
+        <div class="btn btnLeft">&lt;</div>
+        <div class="btn btnRight">&gt;</div>
+         <div class="sliderIndex">
+            <span class="active"></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+    
+   
+    <script src="js/move.js"></script>
+    <script>
+        var timer = null;
+        var sliderPage = document.getElementsByClassName('sliderPage')[0];
+        var moveWidth = sliderPage.children[0].offsetWidth;
+        var num = sliderPage.children.length -1;
+        var btnLeft = document.getElementsByClassName('btnLeft')[0];
+        var btnRight = document.getElementsByClassName('btnRight')[0];
+        var oSpanArray = document.getElementsByClassName('sliderIndex')[0].getElementsByTagName('span');
+        var lock = true;
+        var index = 0;
+        btnLeft.onclick = function(){
+            autoMove('right -> left');
+        }
+        btnRight.onclick = function(){
+            autoMove('left -> right');
+        }
+        for(var i = 0; i < oSpanArray.length; i++){
+            (function(myindex){
+                oSpanArray[i].onclick = function(){
+                    lock = false;
+                    clearTimeout(timer);
+                    index = myindex;
+                    startMove(sliderPage,{left:- index * moveWidth},function(){
+                        lock = true;
+                        timer = setTimeout(autoMove,1500);
+                        changeIndex(index)
+                    })
+                }
+            })(i)
+        }
+        function autoMove(direction){
+           if(lock){
+                lock = false;
+                clearTimeout(timer);
+                if(direction == 'left -> right' || !direction){
+                    index ++;
+                    startMove(sliderPage,{left:sliderPage.offsetLeft - moveWidth},function(){
+                        if(sliderPage.offsetLeft == - num * moveWidth){
+                            index = 0; 
+                            sliderPage.style.left = '0px';                                                   
+                        }
+                        timer = setTimeout(autoMove,1500);
+                        lock = true;
+                        changeIndex(index);
+                    })
+                }else if(direction == 'right -> left'){               
+                    if(sliderPage.offsetLeft == 0){
+                        index = num;
+                        sliderPage.style.left = - num * moveWidth + 'px';
+                    }
+                    index --;
+                    startMove(sliderPage,{left:sliderPage.offsetLeft + moveWidth},function(){
+                        timer = setTimeout(autoMove,1500);
+                        lock = true;
+                        changeIndex(index);
+                    })
+                }
+            }
+        }
+        timer = setTimeout(autoMove,1500);
+        function changeIndex(_index){
+            for(var i = 0; i < oSpanArray.length; i++){
+                oSpanArray[i].className = '';
+            }
+            oSpanArray[_index].className = 'active';
+        }
+    </script>
+</body>
+</html>
